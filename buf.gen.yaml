@@ -1,0 +1,13 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/botchris/go-echopb
+plugins:
+  - remote: buf.build/protocolbuffers/go:v1.36.5
+    out: gen
+  - remote: buf.build/grpc/go
+    out: gen
+    opt:
+      - require_unimplemented_servers=true
