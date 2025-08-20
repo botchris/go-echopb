@@ -17,15 +17,15 @@ type Args struct {
 func Run(ctx context.Context, conn *grpc.ClientConn, args Args) {
 	client := echov1.NewEchoServiceClient(conn)
 
-	res, err := client.EchoAbort(ctx, &echov1.EchoRequest{Message: args.Message})
-	if err != nil {
-		st, ok := status.FromError(err)
-		if !ok {
-			log.Fatalf("Failed to call EchoAbort service: %v", err)
-		}
-
-		log.Printf("Response Status (%d): %s\n", st.Code(), st.Message())
+	_, err := client.EchoAbort(ctx, &echov1.EchoRequest{Message: args.Message})
+	if err == nil {
+		log.Fatal("Expected an error from EchoAbort, but got none")
 	}
 
-	log.Printf("#%d %s\n", res.GetMessageCount(), res.GetMessage())
+	st, ok := status.FromError(err)
+	if !ok {
+		log.Fatalf("Failed to call EchoAbort service: %v", err)
+	}
+
+	log.Printf("Response Status (%s): %s\n", st.Code().String(), st.Message())
 }

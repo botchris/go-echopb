@@ -1,4 +1,4 @@
-package ssbasic
+package ssabort
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	echov1 "github.com/botchris/go-echopb/gen/github.com/botchris/go-echopb/testing/echo/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 )
 
 // Args defines the command line arguments for the echo subcommand.
@@ -20,7 +21,7 @@ type Args struct {
 func Run(ctx context.Context, conn *grpc.ClientConn, args Args) {
 	client := echov1.NewEchoServiceClient(conn)
 
-	res, err := client.ServerStreamingEcho(ctx, &echov1.ServerStreamingEchoRequest{
+	res, err := client.ServerStreamingEchoAbort(ctx, &echov1.ServerStreamingEchoRequest{
 		Message:         args.Message,
 		MessageCount:    args.Count,
 		MessageInterval: args.Interval,
@@ -36,10 +37,17 @@ func Run(ctx context.Context, conn *grpc.ClientConn, args Args) {
 		resp, rErr := res.Recv()
 		if rErr != nil {
 			if errors.Is(rErr, io.EOF) {
-				break
+				log.Fatalf("Echo service returned EOF, but was an abort code")
 			}
 
-			log.Fatalf("Failed to receive response: %v", rErr)
+			st, ok := status.FromError(rErr)
+			if !ok {
+				log.Fatalf("Echo service returned an error, but it was not a gRPC status error: %v", rErr)
+			}
+
+			log.Printf("Response Status (%s): %s\n", st.Code().String(), st.Message())
+
+			break
 		}
 
 		log.Printf("#%d %s", i, resp.GetMessage())

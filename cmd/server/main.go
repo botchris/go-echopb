@@ -26,7 +26,8 @@ func main() {
 	args := arguments{}
 	arg.MustParse(&args)
 
-	grpcServer := grpc.NewServer()
+	options := make([]grpc.ServerOption, 0)
+	grpcServer := grpc.NewServer(options...)
 	echov1.RegisterEchoServiceServer(grpcServer, NewServer())
 
 	if args.Debug {
@@ -64,7 +65,8 @@ func main() {
 				},
 			})
 		}),
-	).Run()
+	).
+		Run()
 }
 
 type server struct {
@@ -111,9 +113,7 @@ func (a *server) ServerStreamingEcho(req *echov1.ServerStreamingEchoRequest, ser
 				return nil
 			}
 
-			if err := server.Send(&echov1.ServerStreamingEchoResponse{
-				Message: req.Message,
-			}); err != nil {
+			if err := server.Send(&echov1.ServerStreamingEchoResponse{Message: req.Message}); err != nil {
 				return err
 			}
 
@@ -164,9 +164,7 @@ func (a *server) ClientStreamingEcho(client echov1.EchoService_ClientStreamingEc
 	for {
 		select {
 		case <-done:
-			return client.SendAndClose(&echov1.ClientStreamingEchoResponse{
-				MessageCount: int32(count),
-			})
+			return client.SendAndClose(&echov1.ClientStreamingEchoResponse{MessageCount: int32(count)})
 		default:
 			if _, err := client.Recv(); err != nil {
 				return err

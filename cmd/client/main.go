@@ -3,14 +3,18 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"log"
 
 	"github.com/alexflint/go-arg"
 	"github.com/botchris/go-echopb/cmd/client/internal/abort"
 	"github.com/botchris/go-echopb/cmd/client/internal/basic"
+	"github.com/botchris/go-echopb/cmd/client/internal/csbasic"
 	"github.com/botchris/go-echopb/cmd/client/internal/noop"
+	"github.com/botchris/go-echopb/cmd/client/internal/ssabort"
 	"github.com/botchris/go-echopb/cmd/client/internal/ssbasic"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -23,6 +27,8 @@ type arguments struct {
 	Noop  *noop.Args  `arg:"subcommand:no-op" help:"Sends an empty request to the server amd waits for an empty response."`
 
 	ServerStreamBasic *ssbasic.Args `arg:"subcommand:ss-basic" help:"(Server Stream) Sends a message to the service and waits for a stream of responses from the server."`
+	ServerStreamAbort *ssabort.Args `arg:"subcommand:ss-abort" help:"(Server Stream) Similar to ss-basic, but the server will abort the stream after a certain number of messages."`
+	ClientStreamBasic *csbasic.Args `arg:"subcommand:cs-basic" help:"(Client Stream) Sends a stream of messages to the server, and then waits for the count response from the server."`
 }
 
 func main() {
@@ -35,6 +41,8 @@ func main() {
 	dialOptions := make([]grpc.DialOption, 0)
 	if args.Insecure {
 		dialOptions = append(dialOptions, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	} else {
+		dialOptions = append(dialOptions, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	}
 
 	cc, err := grpc.NewClient(args.ServerAddr, dialOptions...)
@@ -57,6 +65,10 @@ func main() {
 		noop.Run(ctx, cc, *args.Noop)
 	case args.ServerStreamBasic != nil:
 		ssbasic.Run(ctx, cc, *args.ServerStreamBasic)
+	case args.ServerStreamAbort != nil:
+		ssabort.Run(ctx, cc, *args.ServerStreamAbort)
+	case args.ClientStreamBasic != nil:
+		csbasic.Run(ctx, cc, *args.ClientStreamBasic)
 	default:
 		var help bytes.Buffer
 
