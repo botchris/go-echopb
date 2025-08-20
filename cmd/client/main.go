@@ -9,10 +9,10 @@ import (
 	"github.com/alexflint/go-arg"
 	"github.com/botchris/go-echopb/cmd/client/internal/abort"
 	"github.com/botchris/go-echopb/cmd/client/internal/basic"
-	"github.com/botchris/go-echopb/cmd/client/internal/csbasic"
+	"github.com/botchris/go-echopb/cmd/client/internal/clientstream"
+	"github.com/botchris/go-echopb/cmd/client/internal/fullduplex"
 	"github.com/botchris/go-echopb/cmd/client/internal/noop"
-	"github.com/botchris/go-echopb/cmd/client/internal/ssabort"
-	"github.com/botchris/go-echopb/cmd/client/internal/ssbasic"
+	"github.com/botchris/go-echopb/cmd/client/internal/serverstream"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -26,9 +26,9 @@ type arguments struct {
 	Abort *abort.Args `arg:"subcommand:abort" help:"Sends back abort status."`
 	Noop  *noop.Args  `arg:"subcommand:no-op" help:"Sends an empty request to the server amd waits for an empty response."`
 
-	ServerStreamBasic *ssbasic.Args `arg:"subcommand:ss-basic" help:"(Server Stream) Sends a message to the service and waits for a stream of responses from the server."`
-	ServerStreamAbort *ssabort.Args `arg:"subcommand:ss-abort" help:"(Server Stream) Similar to ss-basic, but the server will abort the stream after a certain number of messages."`
-	ClientStreamBasic *csbasic.Args `arg:"subcommand:cs-basic" help:"(Client Stream) Sends a stream of messages to the server, and then waits for the count response from the server."`
+	ServerStreamBasic     *serverstream.Args `arg:"subcommand:server-stream" help:"(Server Stream) Sends a message to the service and waits for a stream of responses from the server."`
+	ClientStreamBasic     *clientstream.Args `arg:"subcommand:client-stream" help:"(Client Stream) Sends a stream of messages to the server, and then waits for the count response from the server."`
+	FullDuplexStreamBasic *fullduplex.Args   `arg:"subcommand:full-duplex" help:"(Full Duplex Stream) Sends a stream of messages to the server, and receives them back in realtime."`
 }
 
 func main() {
@@ -64,11 +64,11 @@ func main() {
 	case args.Noop != nil:
 		noop.Run(ctx, cc, *args.Noop)
 	case args.ServerStreamBasic != nil:
-		ssbasic.Run(ctx, cc, *args.ServerStreamBasic)
-	case args.ServerStreamAbort != nil:
-		ssabort.Run(ctx, cc, *args.ServerStreamAbort)
+		serverstream.Run(ctx, cc, *args.ServerStreamBasic)
 	case args.ClientStreamBasic != nil:
-		csbasic.Run(ctx, cc, *args.ClientStreamBasic)
+		clientstream.Run(ctx, cc, *args.ClientStreamBasic)
+	case args.FullDuplexStreamBasic != nil:
+		fullduplex.Run(ctx, cc, *args.FullDuplexStreamBasic)
 	default:
 		var help bytes.Buffer
 

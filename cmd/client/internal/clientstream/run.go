@@ -1,10 +1,9 @@
-package ssbasic
+package clientstream
 
 import (
 	"context"
-	"errors"
-	"io"
 	"log"
+	"time"
 
 	echov1 "github.com/botchris/go-echopb/gen/github.com/botchris/go-echopb/testing/echo/v1"
 	"google.golang.org/grpc"
@@ -20,30 +19,29 @@ type Args struct {
 func Run(ctx context.Context, conn *grpc.ClientConn, args Args) {
 	client := echov1.NewEchoServiceClient(conn)
 
-	res, err := client.ServerStreamingEcho(ctx, &echov1.ServerStreamingEchoRequest{
-		Message:         args.Message,
-		MessageCount:    args.Count,
-		MessageInterval: args.Interval,
-	})
-
+	stream, err := client.ClientStreamingEcho(ctx)
 	if err != nil {
 		log.Fatalf("Failed to call Echo service: %v", err)
 	}
 
-	i := 1
-
-	for {
-		resp, rErr := res.Recv()
-		if rErr != nil {
-			if errors.Is(rErr, io.EOF) {
-				break
-			}
-
-			log.Fatalf("Failed to receive response: %v", rErr)
+	for i := 0; i < int(args.Count); i++ {
+		sErr := stream.Send(&echov1.ClientStreamingEchoRequest{Message: args.Message})
+		if sErr != nil {
+			log.Fatalf("Failed to send message to Echo service: %v", sErr)
 		}
 
-		log.Printf("#%d %s", i, resp.GetMessage())
-
-		i++
+		log.Printf("#%d %s... sent!\n", i+1, args.Message)
+		time.Sleep(time.Duration(args.Interval) * time.Millisecond)
 	}
+
+	println()
+	log.Printf("All messages sent, waiting for response...\n")
+	println()
+
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Failed to receive response from Echo service: %v", err)
+	}
+
+	log.Printf("Server receive count: %d\n", res.GetMessageCount())
 }

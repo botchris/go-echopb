@@ -27,7 +27,6 @@ const (
 	EchoService_ServerStreamingEchoAbort_FullMethodName = "/testing.echo.v1.EchoService/ServerStreamingEchoAbort"
 	EchoService_ClientStreamingEcho_FullMethodName      = "/testing.echo.v1.EchoService/ClientStreamingEcho"
 	EchoService_FullDuplexEcho_FullMethodName           = "/testing.echo.v1.EchoService/FullDuplexEcho"
-	EchoService_HalfDuplexEcho_FullMethodName           = "/testing.echo.v1.EchoService/HalfDuplexEcho"
 )
 
 // EchoServiceClient is the client API for EchoService service.
@@ -57,11 +56,6 @@ type EchoServiceClient interface {
 	// The server returns the same client messages in order.
 	// E.g. this is how the speech API works.
 	FullDuplexEcho(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[EchoRequest, EchoResponse], error)
-	// A sequence of requests followed by a sequence of responses.
-	// The server buffers all the client messages and then returns the same
-	// client messages one by one after the client half-closes the stream.
-	// This is how an image recognition API may work.
-	HalfDuplexEcho(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[EchoRequest, EchoResponse], error)
 }
 
 type echoServiceClient struct {
@@ -166,19 +160,6 @@ func (c *echoServiceClient) FullDuplexEcho(ctx context.Context, opts ...grpc.Cal
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type EchoService_FullDuplexEchoClient = grpc.BidiStreamingClient[EchoRequest, EchoResponse]
 
-func (c *echoServiceClient) HalfDuplexEcho(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[EchoRequest, EchoResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &EchoService_ServiceDesc.Streams[4], EchoService_HalfDuplexEcho_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[EchoRequest, EchoResponse]{ClientStream: stream}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type EchoService_HalfDuplexEchoClient = grpc.BidiStreamingClient[EchoRequest, EchoResponse]
-
 // EchoServiceServer is the server API for EchoService service.
 // All implementations must embed UnimplementedEchoServiceServer
 // for forward compatibility.
@@ -206,11 +187,6 @@ type EchoServiceServer interface {
 	// The server returns the same client messages in order.
 	// E.g. this is how the speech API works.
 	FullDuplexEcho(grpc.BidiStreamingServer[EchoRequest, EchoResponse]) error
-	// A sequence of requests followed by a sequence of responses.
-	// The server buffers all the client messages and then returns the same
-	// client messages one by one after the client half-closes the stream.
-	// This is how an image recognition API may work.
-	HalfDuplexEcho(grpc.BidiStreamingServer[EchoRequest, EchoResponse]) error
 	mustEmbedUnimplementedEchoServiceServer()
 }
 
@@ -241,9 +217,6 @@ func (UnimplementedEchoServiceServer) ClientStreamingEcho(grpc.ClientStreamingSe
 }
 func (UnimplementedEchoServiceServer) FullDuplexEcho(grpc.BidiStreamingServer[EchoRequest, EchoResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method FullDuplexEcho not implemented")
-}
-func (UnimplementedEchoServiceServer) HalfDuplexEcho(grpc.BidiStreamingServer[EchoRequest, EchoResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method HalfDuplexEcho not implemented")
 }
 func (UnimplementedEchoServiceServer) mustEmbedUnimplementedEchoServiceServer() {}
 func (UnimplementedEchoServiceServer) testEmbeddedByValue()                     {}
@@ -356,13 +329,6 @@ func _EchoService_FullDuplexEcho_Handler(srv interface{}, stream grpc.ServerStre
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type EchoService_FullDuplexEchoServer = grpc.BidiStreamingServer[EchoRequest, EchoResponse]
 
-func _EchoService_HalfDuplexEcho_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(EchoServiceServer).HalfDuplexEcho(&grpc.GenericServerStream[EchoRequest, EchoResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type EchoService_HalfDuplexEchoServer = grpc.BidiStreamingServer[EchoRequest, EchoResponse]
-
 // EchoService_ServiceDesc is the grpc.ServiceDesc for EchoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -402,12 +368,6 @@ var EchoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "FullDuplexEcho",
 			Handler:       _EchoService_FullDuplexEcho_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "HalfDuplexEcho",
-			Handler:       _EchoService_HalfDuplexEcho_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

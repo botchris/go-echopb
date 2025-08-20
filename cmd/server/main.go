@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"time"
@@ -166,8 +168,13 @@ func (a *server) ClientStreamingEcho(client echov1.EchoService_ClientStreamingEc
 		case <-done:
 			return client.SendAndClose(&echov1.ClientStreamingEchoResponse{MessageCount: int32(count)})
 		default:
-			if _, err := client.Recv(); err != nil {
-				return err
+			_, err := client.Recv()
+			if err != nil {
+				if !errors.Is(err, io.EOF) {
+					return err
+				}
+
+				return client.SendAndClose(&echov1.ClientStreamingEchoResponse{MessageCount: int32(count)})
 			}
 
 			count++
@@ -198,36 +205,6 @@ func (a *server) FullDuplexEcho(server echov1.EchoService_FullDuplexEchoServer) 
 			}); sErr != nil {
 				return sErr
 			}
-		}
-	}
-}
-
-func (a *server) HalfDuplexEcho(server echov1.EchoService_HalfDuplexEchoServer) error {
-	ctx := server.Context()
-	done := ctx.Done()
-	count := 0
-	buffer := make([]*echov1.EchoRequest, 0)
-
-	for {
-		select {
-		case <-done:
-			return nil
-		default:
-			req, err := server.Recv()
-			if err != nil {
-				for _, bReq := range buffer {
-					if sErr := server.Send(&echov1.EchoResponse{
-						Message:      bReq.Message,
-						MessageCount: int32(count),
-					}); sErr != nil {
-						return sErr
-					}
-				}
-
-				return nil
-			}
-
-			buffer = append(buffer, req)
 		}
 	}
 }
