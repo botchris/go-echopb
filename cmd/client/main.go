@@ -15,14 +15,14 @@ import (
 )
 
 type arguments struct {
-	ServerAddr string `arg:"--host,required" help:"The address of the server"`
+	ServerAddr string `arg:"--host,required" help:"The address of the server, e.g. example.com:443" placeholder:"HOST:POST"`
 	Insecure   bool   `arg:"--insecure" help:"Use an insecure connection (without TLS)"`
 
 	Basic *basic.Args `arg:"subcommand:basic" help:"Sends a message to the service and waits for a response."`
 	Abort *abort.Args `arg:"subcommand:abort" help:"Sends back abort status."`
 	Noop  *noop.Args  `arg:"subcommand:no-op" help:"Sends an empty request to the server amd waits for an empty response."`
 
-	ServerStreamBasic *ssbasic.Args `arg:"subcommand:server-streaming-basic" help:"Sends a message to the service and waits for a stream of responses."`
+	ServerStreamBasic *ssbasic.Args `arg:"subcommand:ss-basic" help:"(Server Stream) Sends a message to the service and waits for a stream of responses from the server."`
 }
 
 func main() {

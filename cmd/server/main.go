@@ -2,13 +2,70 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"net"
+	"os"
 	"time"
 
+	"github.com/alexflint/go-arg"
 	echov1 "github.com/botchris/go-echopb/gen/github.com/botchris/go-echopb/testing/echo/v1"
+	"go.uber.org/fx"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+type arguments struct {
+	ListenAddr string `arg:"--listen" help:"The address to listen on for incoming connections." default:":443" placeholder:"ADDR"`
+	Debug      bool   `arg:"--debug" help:"Enable debug logging."`
+}
+
+func main() {
+	args := arguments{}
+	arg.MustParse(&args)
+
+	grpcServer := grpc.NewServer()
+	echov1.RegisterEchoServiceServer(grpcServer, NewServer())
+
+	if args.Debug {
+		grpclog.SetLoggerV2(grpclog.NewLoggerV2WithVerbosity(os.Stdout, os.Stdout, os.Stderr, 99))
+	}
+
+	stopped := make(chan struct{})
+
+	fx.New(
+		fx.Invoke(func(lc fx.Lifecycle) {
+			lc.Append(fx.Hook{
+				OnStart: func(ctx context.Context) error {
+					listener, err := net.Listen("tcp", args.ListenAddr)
+					if err != nil {
+						return err
+					}
+
+					go func() {
+						defer close(stopped)
+
+						// lock serving
+						if sErr := grpcServer.Serve(listener); sErr != nil {
+							fmt.Printf("GRPC server ended with error: %s\n", err)
+						}
+					}()
+
+					return nil
+				},
+				OnStop: func(context.Context) error {
+					grpcServer.GracefulStop()
+
+					<-stopped
+
+					return nil
+				},
+			})
+		}),
+	).Run()
+}
 
 type server struct {
 	echov1.UnimplementedEchoServiceServer
@@ -20,15 +77,11 @@ func NewServer() echov1.EchoServiceServer {
 }
 
 func (a *server) Echo(_ context.Context, req *echov1.EchoRequest) (*echov1.EchoResponse, error) {
-	return &echov1.EchoResponse{
-		Message: req.Message,
-	}, nil
+	return &echov1.EchoResponse{Message: req.Message}, nil
 }
 
 func (a *server) EchoAbort(_ context.Context, req *echov1.EchoRequest) (*echov1.EchoResponse, error) {
-	return &echov1.EchoResponse{
-		Message: req.Message,
-	}, status.Error(codes.Aborted, req.Message)
+	return &echov1.EchoResponse{Message: req.Message}, status.Error(codes.Aborted, req.Message)
 }
 
 func (a *server) NoOp(_ context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
