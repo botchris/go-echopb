@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/botchris/go-echopb/cmd/client/internal/serverstream/ssabort"
+	"github.com/botchris/go-echopb/cmd/echopb-client/internal/serverstream/ssabort"
 	echov1 "github.com/botchris/go-echopb/gen/github.com/botchris/go-echopb/testing/echo/v1"
 	"google.golang.org/grpc"
 )
