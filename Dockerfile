@@ -9,7 +9,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /out/server 
 
 FROM scratch
 
-COPY --from=builder /out/server /bin/server
 COPY --from=builder /out/client /bin/client
+COPY --from=builder /out/server /bin/server
 
 CMD ["/bin/server"]
