@@ -6,7 +6,7 @@ Is a simple gRPC client and server for testing protocol connectivity and perform
 
 ### Docker Image
 
-You can run the EchoPB server using the official Docker Image:
+You can run the server and client using the official Docker Image:
 
 ```bash
 # Start the server on port 4040
