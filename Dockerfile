@@ -1,4 +1,4 @@
-FROM golang:1.24.4 AS builder
+FROM --platform=${BUILDPLATFORM} golang:1.24.4 AS builder
 
 WORKDIR /src
 COPY . .
@@ -9,6 +9,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /out/server 
 
 FROM scratch
 
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /out/client /bin/client
 COPY --from=builder /out/server /bin/server
 
