@@ -32,9 +32,6 @@ type arguments struct {
 }
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	args := arguments{}
 	parser := arg.MustParse(&args)
 
@@ -50,7 +47,11 @@ func main() {
 		log.Fatal("Failed to create gRPC client:", err)
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	defer func() {
+		cancel()
+
 		if cErr := cc.Close(); cErr != nil {
 			println("Failed to close connection:", cErr.Error())
 		}
