@@ -4,7 +4,7 @@ protos:
 	go tool buf generate --timeout 10m .
 
 release:
-	docker buildx build --platform linux/386,linux/amd64,linux/arm64 -t botchrishub/echopb:latest --push .
+	docker buildx build --no-cache --platform linux/amd64,linux/arm64,linux/386 -t botchrishub/echopb:latest --push .
 
 client:
 	go build -o dist/client ./cmd/echopb-client

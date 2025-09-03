@@ -50,6 +50,8 @@ func main() {
 					go func() {
 						defer close(stopped)
 
+						fmt.Printf("gRPC server listening on %s\n", args.ListenAddr)
+
 						// lock serving
 						if sErr := grpcServer.Serve(listener); sErr != nil {
 							fmt.Printf("GRPC server ended with error: %s\n", err)
