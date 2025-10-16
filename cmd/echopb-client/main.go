@@ -13,14 +13,16 @@ import (
 	"github.com/botchris/go-echopb/cmd/echopb-client/internal/fullduplex"
 	"github.com/botchris/go-echopb/cmd/echopb-client/internal/noop"
 	"github.com/botchris/go-echopb/cmd/echopb-client/internal/serverstream"
+	"github.com/botchris/go-echopb/cmd/echopb-client/internal/shared"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type arguments struct {
-	ServerAddr string `arg:"--host,required" help:"The address of the server, e.g. example.com:443" placeholder:"HOST:POST"`
-	Insecure   bool   `arg:"--insecure" help:"Use an insecure connection (without TLS)"`
+	ServerAddr  string `arg:"--host,required" help:"The address of the server, e.g. example.com:443" placeholder:"HOST:POST"`
+	Insecure    bool   `arg:"--insecure" help:"Use an insecure connection (without TLS)"`
+	Connections uint   `arg:"--connections" help:"Number of connections to establish to the server" default:"1"`
 
 	Basic *basic.Args `arg:"subcommand:basic" help:"Sends a message to the service and waits for a response."`
 	Abort *abort.Args `arg:"subcommand:abort" help:"Sends back abort status."`
@@ -35,6 +37,10 @@ func main() {
 	args := arguments{}
 	parser := arg.MustParse(&args)
 
+	if args.Connections == 0 {
+		log.Fatal("The number of connections must be greater than 0")
+	}
+
 	dialOptions := make([]grpc.DialOption, 0)
 	if args.Insecure {
 		dialOptions = append(dialOptions, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -42,34 +48,43 @@ func main() {
 		dialOptions = append(dialOptions, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	}
 
-	cc, err := grpc.NewClient(args.ServerAddr, dialOptions...)
-	if err != nil {
-		log.Fatal("Failed to create gRPC client:", err)
+	connections := make([]*grpc.ClientConn, 0)
+
+	for i := uint(0); i < args.Connections; i++ {
+		cc, err := grpc.NewClient(args.ServerAddr, dialOptions...)
+		if err != nil {
+			log.Fatal("Failed to create gRPC client:", err)
+		}
+
+		connections = append(connections, cc)
 	}
 
+	pool := shared.NewConnectionPool(connections)
 	ctx, cancel := context.WithCancel(context.Background())
 
 	defer func() {
 		cancel()
 
-		if cErr := cc.Close(); cErr != nil {
-			println("Failed to close connection:", cErr.Error())
+		for i := range connections {
+			if cErr := connections[i].Close(); cErr != nil {
+				println("Failed to close connection:", cErr.Error())
+			}
 		}
 	}()
 
 	switch {
 	case args.Basic != nil:
-		basic.Run(ctx, cc, *args.Basic)
+		basic.Run(ctx, pool, *args.Basic)
 	case args.Abort != nil:
-		abort.Run(ctx, cc, *args.Abort)
+		abort.Run(ctx, pool, *args.Abort)
 	case args.Noop != nil:
-		noop.Run(ctx, cc, *args.Noop)
+		noop.Run(ctx, pool, *args.Noop)
 	case args.ServerStreamBasic != nil:
-		serverstream.Run(ctx, cc, *args.ServerStreamBasic)
+		serverstream.Run(ctx, pool, *args.ServerStreamBasic)
 	case args.ClientStreamBasic != nil:
-		clientstream.Run(ctx, cc, *args.ClientStreamBasic)
+		clientstream.Run(ctx, pool, *args.ClientStreamBasic)
 	case args.FullDuplexStreamBasic != nil:
-		fullduplex.Run(ctx, cc, *args.FullDuplexStreamBasic)
+		fullduplex.Run(ctx, pool, *args.FullDuplexStreamBasic)
 	default:
 		var help bytes.Buffer
 

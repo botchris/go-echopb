@@ -6,8 +6,8 @@ import (
 	"io"
 	"log"
 
+	"github.com/botchris/go-echopb/cmd/echopb-client/internal/shared"
 	echov1 "github.com/botchris/go-echopb/gen/github.com/botchris/go-echopb/testing/echo/v1"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 )
 
@@ -18,8 +18,8 @@ type Args struct {
 	Interval int32  `arg:"--interval" help:"The interval in milliseconds between each message sent by the server." default:"100"`
 }
 
-func Run(ctx context.Context, conn *grpc.ClientConn, args Args) {
-	client := echov1.NewEchoServiceClient(conn)
+func Run(ctx context.Context, conn *shared.ConnectionPool, args Args) {
+	client := echov1.NewEchoServiceClient(conn.Next())
 
 	res, err := client.ServerStreamingEchoAbort(ctx, &echov1.ServerStreamingEchoRequest{
 		Message:         args.Message,

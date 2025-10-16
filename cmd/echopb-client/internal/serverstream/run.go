@@ -7,8 +7,8 @@ import (
 	"log"
 
 	"github.com/botchris/go-echopb/cmd/echopb-client/internal/serverstream/ssabort"
+	"github.com/botchris/go-echopb/cmd/echopb-client/internal/shared"
 	echov1 "github.com/botchris/go-echopb/gen/github.com/botchris/go-echopb/testing/echo/v1"
-	"google.golang.org/grpc"
 )
 
 // Args defines the command line arguments for the echo subcommand.
@@ -19,7 +19,7 @@ type Args struct {
 	Abort    bool   `arg:"--abort" help:"Indicates the server to send an abort status when finishing the connection"`
 }
 
-func Run(ctx context.Context, conn *grpc.ClientConn, args Args) {
+func Run(ctx context.Context, conn *shared.ConnectionPool, args Args) {
 	if args.Abort {
 		ssabort.Run(ctx, conn, ssabort.Args{
 			Message:  args.Message,
@@ -30,7 +30,7 @@ func Run(ctx context.Context, conn *grpc.ClientConn, args Args) {
 		return
 	}
 
-	client := echov1.NewEchoServiceClient(conn)
+	client := echov1.NewEchoServiceClient(conn.Next())
 
 	res, err := client.ServerStreamingEcho(ctx, &echov1.ServerStreamingEchoRequest{
 		Message:         args.Message,
