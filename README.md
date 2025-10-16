@@ -10,11 +10,11 @@ You can run the server and client using the official Docker Image:
 
 ```sh
 # Start the server on port 4040
-docker run --rm botchrishub/echopb:latest /bin/server --listen ":4040"
+docker run --rm -p 4040:4040 botchrishub/echopb:latest /usr/local/bin/server --listen ":4040"
 
 # Communicate with the server using the client CLI
-docker run --rm botchrishub/echopb:latest /bin/client --host ":4040" basic "hello world!"
-docker run --rm botchrishub/echopb:latest /bin/client --host ":4040" server-stream "hello world!" --count 1000 --interval 250
+docker run --rm botchrishub/echopb:latest /usr/local/bin/client --host ":4040" basic "hello world!"
+docker run --rm botchrishub/echopb:latest /usr/local/bin/client --host ":4040" server-stream "hello world!" --count 1000 --interval 250
 ```
 
 ### Go Installation
