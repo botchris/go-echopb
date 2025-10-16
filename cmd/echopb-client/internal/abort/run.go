@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
+	"github.com/botchris/go-echopb/cmd/echopb-client/internal/shared"
 	echov1 "github.com/botchris/go-echopb/gen/github.com/botchris/go-echopb/testing/echo/v1"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 )
 
@@ -14,8 +14,8 @@ type Args struct {
 	Message string `arg:"positional,required" help:"The message to send to the Echo service."`
 }
 
-func Run(ctx context.Context, conn *grpc.ClientConn, args Args) {
-	client := echov1.NewEchoServiceClient(conn)
+func Run(ctx context.Context, conn *shared.ConnectionPool, args Args) {
+	client := echov1.NewEchoServiceClient(conn.Next())
 
 	_, err := client.EchoAbort(ctx, &echov1.EchoRequest{Message: args.Message})
 	if err == nil {
