@@ -21,10 +21,10 @@ import (
 
 type arguments struct {
 	ServerAddr  string `arg:"--host,required" help:"The address of the server, e.g. example.com:443" placeholder:"HOST:POST"`
-	Insecure    bool   `arg:"--insecure" help:"Use an insecure connection (without TLS)"`
-	Connections uint   `arg:"--connections" help:"Number of connections to establish to the server" default:"1"`
+	Insecure    bool   `arg:"--insecure" help:"Use an insecure connection (without TLS)."`
+	Connections uint   `arg:"--connections" help:"Number of connections to establish to the server. When using multiple connections, requests will be load balanced across them." default:"1"`
 
-	Basic *basic.Args `arg:"subcommand:basic" help:"Sends a message to the service and waits for a response."`
+	Basic *basic.Args `arg:"subcommand:basic" help:"Sends one or many messages to the service and waits for a response using unary RPC."`
 	Abort *abort.Args `arg:"subcommand:abort" help:"Sends back abort status."`
 	Noop  *noop.Args  `arg:"subcommand:no-op" help:"Sends an empty request to the server amd waits for an empty response."`
 

@@ -14,6 +14,7 @@ type Args struct {
 	Message string `arg:"positional,required" help:"The message to send to the Echo service."`
 }
 
+// Run executes the subcommand.
 func Run(ctx context.Context, conn *shared.ConnectionPool, args Args) {
 	client := echov1.NewEchoServiceClient(conn.Next())
 

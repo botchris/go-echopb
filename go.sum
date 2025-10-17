@@ -38,6 +38,8 @@ github.com/alexflint/go-scalar v1.2.0 h1:WR7JPKkeNpnYIOfHRa7ivM21aWAdHD0gEWHCx+W
 github.com/alexflint/go-scalar v1.2.0/go.mod h1:LoFvNMqS1CPrMVltza4LvnGKhaSpc3oyLEBUZVhhS2o=
 github.com/antlr4-go/antlr/v4 v4.13.1 h1:SqQKkuVZ+zWkMMNkjy5FZe5mr5WURWnlpmOuzYWrPrQ=
 github.com/antlr4-go/antlr/v4 v4.13.1/go.mod h1:GKmUxMtwp6ZgGwZSva4eWPC5mS6vUAmOABFgjdkM7Nw=
+github.com/brianvoe/gofakeit/v7 v7.8.0 h1:FHLerglGVodD2O4pnQPCmFlkmIRXp8MpAflnarW5sQM=
+github.com/brianvoe/gofakeit/v7 v7.8.0/go.mod h1:QXuPeBw164PJCzCUZVmgpgHJ3Llj49jSLVkKPMtxtxA=
 github.com/bufbuild/buf v1.56.0 h1:Z0eK+npK01FB924rtDVMOJtvBh9c421mYLo9QhUP3pM=
 github.com/bufbuild/buf v1.56.0/go.mod h1:uDNMYshCJIXL99OQc71SDeFiDqOse9sSHXPpZlrqElw=
 github.com/bufbuild/protocompile v0.14.1 h1:iA73zAf/fyljNjQKwYzUHD6AD4R8KMasmwa/FBatYVw=

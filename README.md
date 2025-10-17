@@ -14,7 +14,7 @@ docker run --rm -p 4040:4040 botchrishub/echopb:latest /usr/local/bin/server --l
 
 # Communicate with the server using the client CLI
 docker run --rm botchrishub/echopb:latest /usr/local/bin/client --host ":4040" basic "hello world!"
-docker run --rm botchrishub/echopb:latest /usr/local/bin/client --host ":4040" server-stream "hello world!" --count 1000 --interval 250
+docker run --rm botchrishub/echopb:latest /usr/local/bin/client --host ":4040" server-stream "hello world!" --count 1000 --interval "200ms"
 ```
 
 ### Go Installation
