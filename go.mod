@@ -4,6 +4,9 @@ go 1.24.4
 
 require (
 	github.com/alexflint/go-arg v1.6.0
+	github.com/brianvoe/gofakeit/v7 v7.8.0
+	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
+	github.com/prometheus/client_golang v1.19.1
 	go.uber.org/fx v1.24.0
 	google.golang.org/grpc v1.74.2
 	google.golang.org/protobuf v1.36.7
@@ -29,10 +32,11 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/alexflint/go-scalar v1.2.0 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
-	github.com/brianvoe/gofakeit/v7 v7.8.0 // indirect
+	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bufbuild/buf v1.56.0 // indirect
 	github.com/bufbuild/protocompile v0.14.1 // indirect
 	github.com/bufbuild/protoplugin v0.0.0-20250218205857-750e09ce93e1 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.17.0 // indirect
@@ -68,6 +72,9 @@ require (
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/prometheus/client_model v0.5.0 // indirect
+	github.com/prometheus/common v0.48.0 // indirect
+	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/quic-go/quic-go v0.54.0 // indirect
 	github.com/rs/cors v1.11.1 // indirect
