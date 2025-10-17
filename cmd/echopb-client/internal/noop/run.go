@@ -12,6 +12,7 @@ import (
 // Args defines the command line arguments for the echo subcommand.
 type Args struct{}
 
+// Run executes the subcommand.
 func Run(ctx context.Context, conn *shared.ConnectionPool, args Args) {
 	client := echov1.NewEchoServiceClient(conn.Next())
 

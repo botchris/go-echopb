@@ -42,13 +42,19 @@ func main() {
 		fx.Invoke(func(lc fx.Lifecycle) {
 			lc.Append(fx.Hook{
 				OnStart: func(ctx context.Context) error {
-					listener, err := net.Listen("tcp", args.ListenAddr)
+					listener, err := (&net.ListenConfig{}).Listen(ctx, "tcp", args.ListenAddr)
 					if err != nil {
 						return err
 					}
 
 					go func() {
-						defer close(stopped)
+						defer func() {
+							close(stopped)
+
+							if cErr := listener.Close(); cErr != nil {
+								fmt.Printf("Failed to close listener: %s\n", cErr)
+							}
+						}()
 
 						fmt.Printf("gRPC server listening on %s\n", args.ListenAddr)
 
