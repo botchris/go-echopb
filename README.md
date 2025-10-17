@@ -34,3 +34,13 @@ Then you can run the server and client:
 echopb-server --listen ":4040"
 echopb-client --host ":4040" basic "hello world!"
 ```
+
+## Server Metrics
+
+The EchoPB server exposes Prometheus metrics at the `/metrics` endpoint on the listening port provided by the `--metrics-listen` flag.
+This feature is disabled by default. To enable it, set the `--metrics-listen` flag to the desired address and port. Then you can
+scrape metrics from that endpoint.
+
+```sh
+echopb-server --listen ":4040" --metrics-listen ":9090"
+```
