@@ -2,7 +2,11 @@
 
 Is a simple gRPC client and server for testing protocol connectivity and performance.
 
+---
+
 ## Installation
+
+There are two ways to install EchoPB: using the official Docker image or by installing via Go.
 
 ### Docker Image
 
